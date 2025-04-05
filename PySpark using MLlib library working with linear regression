@@ -1,0 +1,26 @@
+#8 - PySpark using MLlib library working with linear regression
+from pyspark.sql import SparkSession
+from pyspark.ml.regression import LinearRegression
+from pyspark.ml.feature import VectorAssembler
+
+spark.stop()
+spark =  SparkSession.builder.appName("udf examle").getOrCreate()
+
+data =[(1,100),(2,110),(3,120),(4,130),(5,105)]
+
+columns=["Feature","Target"]
+df  = spark.createDataFrame(data,columns)
+
+df.show()
+Assembler = VectorAssembler(inputCols=["Feature"],outputCol="Features")
+Assemebled_df = Assembler.transform(df).select("Features","Target")
+Assemebled_df.show()
+LR = LinearRegression(featuresCol="Features",labelCol="Target")
+LR_model = LR.fit(Assemebled_df)
+print(LR_model.coefficients)
+print(LR_model.intercept)
+training_summary = LR_model.summary
+RMSE = training_summary.rootMeanSquaredError
+print("RMSE,",RMSE)
+prediction = LR_model.transform(Assemebled_df)
+print(prediction.show())
