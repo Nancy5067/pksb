@@ -1,0 +1,30 @@
+#JOINS
+Combined_df = df1.union(df2)
+Combined_df.show()
+df3=df2.select("ID","Name","Age")
+Combined_df.show()
+
+# Using joins [merging dataframe on a column]
+
+data4 = [(1,"Mumbai"),(2,"Bangalore"),(3,"Delhi"),(4,"Amritsar"),(5,"Kolkata"),(6,"Chennai")]
+
+column2 = ["ID","City"]
+
+df4 = spark.createDataFrame(data4,column2)
+df4.show()
+join_df = df1.join(df4,on="ID",how="inner")
+join_df.show()
+
+# Using WITHCOLUMN to add a column
+df1 = df1.withColumn("Country",col("Name"))
+df1.show()
+from pyspark.sql import SparkSession
+spark = SparkSession.builder.appName('read data eg').getOrCreate()
+df1 = spark.read.option("Header",True).csv('dept_name.csv')
+df1.show()
+from pyspark.sql import SparkSession
+spark = SparkSession.builder.appName('read data eg').getOrCreate()
+df2 = spark.read.option("Header",True).csv('dept.csv')
+df2.show()
+df_merge=df1.join(df2,on="dept_id",how="inner")
+df_merge.show()
