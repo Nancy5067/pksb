@@ -1,0 +1,57 @@
+#4Performing data operations using collect, filter, map, and MapReduce in PySpark
+
+from pyspark.sql import  SparkSession
+from pyspark.sql.functions import col
+spark = SparkSession.builder.appName('read data eg').getOrCreate()
+data = [(1,"Laptop",1000,"Electronics"),
+        (2,"Shoes",50,"Fashion"),
+        (3, "Shirt", 25, "Fashion"),
+        (4, "Headphones", 150, "Electronics"),
+        (5, "Pants", 40, "Fashion")]
+column = ["prod_id","product","price","category"]
+df = spark.createDataFrame(data,column)
+df.show()
+collected_data=df.collect()
+for row in collected_data :
+  print(row)
+  df.filter(df["price"]>100).show()
+
+  #Sales Data Analysis : Map reduce
+  from pyspark.sql import SparkSession
+
+# Initialize Spark Session
+spark = SparkSession.builder.appName("SalesTotal").getOrCreate()
+sc = spark.sparkContext  # Get the SparkContext
+
+# Sample sales data (Product, Price)
+sales_data = [
+    ("Laptop", 1000),
+    ("Mobile", 500),
+    ("Laptop", 1200),
+    ("Tablet", 700),
+    ("Mobile", 450),
+    ("Tablet", 650),
+    ("Laptop", 1100),
+    ("Mobile", 520),
+]
+
+# Create an RDD
+rdd = sc.parallelize(sales_data)
+
+# Map Step: Convert each entry to (Product, Price)
+mapped_rdd = rdd.map(lambda x: (x[0], x[1]))
+
+# Reduce Step: Sum up sales for each product
+total_sales_rdd = mapped_rdd.reduceByKey(lambda a, b: a + b)
+
+print("**********************************")
+print("Sales Data Analysis : Map reduce")
+print("**********************************")
+
+# Collect and print results
+result = total_sales_rdd.collect()
+for product, total in result:
+    print(f"{product}: ${total}")
+
+# Stop Spark session
+spark.stop()
