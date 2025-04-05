@@ -1,0 +1,16 @@
+#Combining DataFrame with PySpark
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import col
+
+spark = SparkSession.builder.appName('Combined DataFrame').getOrCreate()
+
+data1 = [(1,"rohan",50),(2,"sumai",21),(3,"sachin",5)]
+data2 = [(4,"ajay",22),(5,"selvester",25),(6,"praveen",24)]
+
+column = ["ID","Name","Age"]
+
+df1 = spark.createDataFrame(data1,column)
+df2 = spark.createDataFrame(data2,column)
+
+df1.show()
+df2.show()
