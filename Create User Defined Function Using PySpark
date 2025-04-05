@@ -1,0 +1,26 @@
+#5BCreate User Defined Function Using PySpark
+from pyspark.sql import SparkSession
+
+spark = SparkSession.builder.appName('User input wala practical').config('Spark Config','config - value').getOrCreate()
+
+num_rows = int(input("Enter number of rows"))
+data = []
+for i in range (num_rows):
+  name=input("Enter Name - ")
+  age = int(input("Enter Age - "))
+  city = input("Enter City - ")
+  data.append((name,age,city))
+column = ["Name","Age","city"]
+df=spark.createDataFrame(data,schema=column)
+
+df.show()
+
+df.printSchema()
+print("Original Data")
+df.select("Name","Age").show()
+
+print("Age Filter")
+df.filter(df['Age']>21).show()
+
+print("Location Filter")
+df.filter(df['City']=="Mumbai").show()
