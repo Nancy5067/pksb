@@ -1,0 +1,67 @@
+#12 - Real-Time Word Count with PySpark Streaming
+from pyspark.sql import SparkSession
+from pyspark.ml.feature import Tokenizer, HashingTF, StringIndexer
+from pyspark.ml.classification import NaiveBayes
+from pyspark.ml import Pipeline
+from pyspark.ml.evaluation import MulticlassClassificationEvaluator
+
+
+
+# Initialize SparkSession.
+# When running on a Hadoop cluster, SparkSession will automatically connect to your Hadoop/HDFS environment.
+spark = SparkSession.builder \
+    .appName("NaiveBayesInPySpark") \
+    .getOrCreate()
+
+# -------------------------------------------------------------------------------
+# If your data resides in HDFS, uncomment and modify the following line:
+# df = spark.read.format("csv").option("header", "true").load("hdfs:///path/to/your/data.csv")
+# -------------------------------------------------------------------------------
+
+# For demonstration, we create a small sample dataset.
+data = [
+    (0, "spark is great and fast", "positive"),
+    (1, "hadoop is reliable but slow", "negative"),
+    (2, "spark and hadoop are big data technologies", "positive"),
+    (3, "I dislike hadoop performance", "negative"),
+    (4, "spark offers ease of development", "positive"),
+    (5, "I am frustrated by hadoop complexities", "negative")
+]
+columns = ["id", "text", "label"]
+df = spark.createDataFrame(data, columns)
+
+# Convert string labels to numeric indices using StringIndexer.
+labelIndexer = StringIndexer(inputCol="label", outputCol="indexedLabel")
+
+# Tokenize the text column: this splits sentences into words.
+tokenizer = Tokenizer(inputCol="text", outputCol="words")
+
+# Convert tokens to feature vectors using HashingTF.
+hashingTF = HashingTF(inputCol="words", outputCol="features", numFeatures=1000)
+
+# Create the Naive Bayes classifier.
+# "multinomial" modelType is typically used for text classification.
+nb = NaiveBayes(labelCol="indexedLabel", featuresCol="features", modelType="multinomial")
+
+# Build the Pipeline that chains the preprocessing and model stages.
+pipeline = Pipeline(stages=[labelIndexer, tokenizer, hashingTF, nb])
+
+# Split the dataset into training and testing sets.
+(trainingData, testData) = df.randomSplit([0.7, 0.3], seed=1234)
+
+# Train the model using the pipeline.
+model = pipeline.fit(trainingData)
+
+# Use the trained model to make predictions on the test data.
+predictions = model.transform(testData)
+predictions.select("id", "text", "label", "indexedLabel", "prediction").show()
+
+# Evaluate the accuracy of the model.
+evaluator = MulticlassClassificationEvaluator(
+    labelCol="indexedLabel", predictionCol="prediction", metricName="accuracy"
+)
+accuracy = evaluator.evaluate(predictions)
+print(f"Test set accuracy: {accuracy}")
+
+# Stop the SparkSession once done.
+spark.stop()
