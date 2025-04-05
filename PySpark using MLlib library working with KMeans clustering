@@ -1,0 +1,21 @@
+#9 - PySpark using MLlib library working with KMeans clustering
+from pyspark.sql import SparkSession
+from pyspark.ml.clustering import KMeans
+from pyspark.ml.feature import VectorAssembler
+
+spark = SparkSession.builder.appName("KMeans").getOrCreate()
+
+data = [(1.0,2.0),(1.5,1.8),(5.0,8.0),(8.0,8.0),(1.0,0.6),(9.0,11.0)]
+columns = ['Sub1','Sub2']
+df = spark.createDataFrame(data,columns)
+df.show()
+assembler = VectorAssembler(inputCols=['Sub1','Sub2'],outputCol='features')
+assembler1=assembler.transform(df)
+assembler1.show()
+Kmeans = KMeans(k=2,seed=1)
+model = Kmeans.fit(assembler1)
+
+prediction = model.transform(assembler1)
+prediction.show()
+for center in model.clusterCenters():
+ print(center)
