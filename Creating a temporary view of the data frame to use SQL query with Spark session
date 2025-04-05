@@ -1,0 +1,47 @@
+#6 - Creating a temporary view of the data frame to use SQL query with Spark session
+from pyspark.sql import SparkSession
+
+spark = SparkSession.builder.appName("DataFrameExample").getOrCreate()
+
+df = spark.createDataFrame([(1, 22), (2, 23), (3, 24)], ["id", "age"])
+df.show()
+
+df.createOrReplaceTempView("people")
+
+
+result = spark.sql("SELECT * FROM people WHERE age > 22").show()
+
+result
+
+#B
+
+from pyspark.sql import SparkSession
+data  = [(1,'electronics',1000,'2024-01-01'),(2,'fashion',50,'2024-01-02'),(3,'cosmetics',500,'2024-01-03'),(4,'novels',1500,'2025-04-04')]
+columns = ['id','category','price','date']
+spark = SparkSession.builder.appName('ecommerce').getOrCreate()
+df = spark.createDataFrame(data,columns)
+df.show()
+df.createOrReplaceTempView("sales")
+
+result = spark.sql("SELECT category,avg(price) as avg_amount FROM sales group by category").show()
+result = spark.sql("SELECT * from sales order by price desc limit 2").show()
+result = spark.sql("SELECT * from sales order by price asc limit 2").show()
+
+#C - Datavizualization
+
+import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn as sns
+
+
+result = spark.sql("SELECT category,avg(price) as avg_amount FROM sales group by category")
+df_query1 = result.toPandas()
+df_query1.head()
+
+#Convert the DataFrames to Pandas
+plt.figure(figsize=(8, 6))
+sns.barplot(x='category', y='avg_amount', data=df_query1)
+plt.title('n\nCategories by Price')
+plt.xlabel('Category')
+plt.ylabel('Price')
+plt.show()
