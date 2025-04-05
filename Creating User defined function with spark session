@@ -1,0 +1,24 @@
+#7Creating User defined function with spark session
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import udf
+from pyspark.sql.types import StringType
+
+spark =  SparkSession.builder.appName("udf examle").getOrCreate()
+
+data = [("kevin",65),("cook",15),("rohit",45),]
+columns = ["Name","Age"]
+df  = spark.createDataFrame(data,columns)
+df.show()
+def age_group(age):
+  if age < 18:
+    return "Minor"
+  elif age >= 18 and age < 60:
+    return "Adult"
+  else:
+    return "Senior"
+age_group_udf = udf(age_group,StringType())
+
+df_with_group = df.withColumn("Age_Group",age_group_udf(df["Age"]))
+df_with_group.show()
+age_count = df_with_group.groupBy("Age_Group").count()
+age_count.show()
