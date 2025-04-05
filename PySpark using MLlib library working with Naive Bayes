@@ -1,0 +1,29 @@
+#11 - PySpark using MLlib library working with Naive Bayes
+from pyspark.sql import SparkSession
+from pyspark.ml.classification import LogisticRegression
+from pyspark.ml.feature import CountVectorizer,IDF,Tokenizer
+
+spark = SparkSession.builder.appName("Logistic Regresion").getOrCreate()
+
+#sample email data
+data = [ (1,"win a free iphone") ,(1,"congratulation you won a lottery"),
+ (0,"lets meet for lunch"),(0,"don't forget to complete the assignment")]
+
+columns = ['label','text']
+df = spark.createDataFrame(data,columns)
+df.show()
+tokenizer = Tokenizer(inputCol='text',outputCol='tokens')
+df = tokenizer.transform(df)
+df.show()
+vectorizer = CountVectorizer(inputCol='tokens',outputCol='rawfeature')
+vector_model = vectorizer.fit(df)
+df = vector_model.transform(df)
+df.show()
+df = df.select('label','rawfeature') # Change 'features1' to 'rawfeature'
+df = df.withColumnRenamed("rawfeature","features1") # Rename the column to 'features1' if necessary for Logistic Regression
+
+LR = LogisticRegression(featuresCol='features1',labelCol='label') # LR is used as the variable for LogisticRegression
+lr_model = LR.fit(df)
+
+prediction = lr_model.transform(df)
+prediction.show()
