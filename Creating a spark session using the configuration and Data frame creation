@@ -1,0 +1,14 @@
+#5Creating a spark session using the configuration and Data frame creation
+from pyspark.sql import SparkSession
+
+spark = SparkSession.builder.appName('SparkSession example').config('Spark Config','config - value').getOrCreate()
+
+from pyspark.sql import Row
+data = [Row(Name='ajit',Age=24),Row(Name='rinku',Age=30),Row(Name='chetan',Age=35)]
+
+df = spark.createDataFrame(data)
+
+df.show()
+
+df.printSchema()
+spark.stop()
