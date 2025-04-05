@@ -1,14 +1,45 @@
 # To read and display data using PySpark, demonstrating the ability to handle large datasets efficiently.
 from pyspark.sql import SparkSession
-spark = SparkSession.builder.appName('read data eg').getOrCreate()
-df = spark.read.option("Header",True).csv('Employee.csv')
+from pyspark.sql.types import StructType, StructField, StringType, IntegerType
+
+# Create Spark session
+spark = SparkSession.builder.appName('create data eg').getOrCreate()
+
+# Sample data (small dataset)
+data = [
+    {"Name": "Alice", "Age": 25, "Department": "HR"},
+    {"Name": "Bob", "Age": 32, "Department": "Finance"},
+    {"Name": "Charlie", "Age": 28, "Department": "IT"},
+    {"Name": "David", "Age": 45, "Department": "Management"},
+    {"Name": "Eva", "Age": 29, "Department": "Marketing"}
+]
+
+# Define schema explicitly
+schema = StructType([
+    StructField("Name", StringType(), True),
+    StructField("Age", IntegerType(), True),
+    StructField("Department", StringType(), True)
+])
+
+# Create DataFrame from the sample data
+df = spark.createDataFrame(data, schema=schema)
+
+# Show all data
 df.show()
+# Show top 5 rows (only useful if more than 5 rows exist, but keeping it for demo)
 df.show(5)
+# Print schema
 df.printSchema()
+# Select and show Age column
 df.select("Age").show()
+# Show top 3 rows of Age column
 df.select("Age").show(3)
-df.filter(df["Age"]>30).show()
+# Filter: show employees older than 30
+df.filter(df["Age"] > 30).show()
+# Convert to Pandas DataFrame and show head/tail
 pandas_df = df.toPandas()
 print(pandas_df.head())
 print(pandas_df.tail())
+
+# Stop Spark session
 spark.stop()
